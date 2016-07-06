@@ -66,14 +66,27 @@ public class MyTreeMap<K, V> implements Map<K, V> {
 		if (target == null) {
             throw new NullPointerException();
 	    }
-		
 		// something to make the compiler happy
 		@SuppressWarnings("unchecked")
 		Comparable<? super K> k = (Comparable<? super K>) target;
 		
-		// the actual search
-        // TODO: Fill this in.
-        return null;
+		boolean notFound = true;
+		Node currentNode = root;
+		while(notFound){
+			if(equals(currentNode.key, k)){
+				return currentNode;
+			}
+			if(currentNode.left == null && currentNode.right == null){
+				return null;
+			}
+			else if(k.compareTo(currentNode.key) > 0) {
+				currentNode = currentNode.right;
+			}
+			else if(k.compareTo(currentNode.key) < 0){
+				currentNode = currentNode.left;
+			}
+    	}
+    	return null;
 	}
 
 	/**
@@ -90,9 +103,19 @@ public class MyTreeMap<K, V> implements Map<K, V> {
 		return target.equals(obj);
 	}
 
+	public boolean findValue(Node current, Object target){
+		if(current == null){
+			return false;
+		}
+		else if(equals(current.value, target)){
+			return true; 
+		}	
+		return findValue(current.left, target) || findValue(current.right, target);
+	}
+
 	@Override
 	public boolean containsValue(Object target) {
-		return false;
+		return findValue(root, target);
 	}
 
 	@Override
@@ -117,8 +140,17 @@ public class MyTreeMap<K, V> implements Map<K, V> {
 	@Override
 	public Set<K> keySet() {
 		Set<K> set = new LinkedHashSet<K>();
-        // TODO: Fill this in.
-		return set;
+        keySetHelper(root, set);	
+        return set;
+	}
+
+	public void keySetHelper(Node n, Set<K> set){
+		if(n == null){
+			return;
+		}
+		keySetHelper(n.left, set);
+		set.add(n.key);
+		keySetHelper(n.right, set);
 	}
 
 	@Override
@@ -126,17 +158,28 @@ public class MyTreeMap<K, V> implements Map<K, V> {
 		if (key == null) {
 			throw new NullPointerException();
 		}
-		if (root == null) {
+		return putHelper(root, key, value);
+	}
+
+	private V putHelper(Node node, K key, V value) { 
+	 	@SuppressWarnings("unchecked")
+		Comparable<? super K> k = (Comparable<? super K>) key;
+		if (node == null) { 
 			root = new Node(key, value);
 			size++;
 			return null;
 		}
-		return putHelper(root, key, value);
-	}
-
-	private V putHelper(Node node, K key, V value) {
-        // TODO: Fill this in.
-        return null;
+		if(k.compareTo(node.key) == 0){ 
+		 	V temp = node.value;
+		 	node.value = value;
+		 	return temp;
+		}
+		else if(k.compareTo(node.key) < 0){
+		 	return putHelper(node.left, key, value);
+		}
+		else {
+		 	return putHelper(node.right, key, value);
+		}
 	}
 
 	@Override
